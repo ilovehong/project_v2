@@ -20,4 +20,4 @@ EXPOSE 5000
 ENV DAPR_HTTP_PORT=3500
 
 # Run app.py when the container launches
-CMD ["python", "app_a.py"]
+CMD ["python", "app.py"]
