@@ -5,7 +5,7 @@ param tags object = {}
 param containerAppsEnvironmentName string
 param containerRegistryName string
 param imageName string = ''
-param serviceName string = 'order-processor'
+param serviceName string = 'openai'
 param managedIdentityName string = ''
 
 module app '../core/host/container-app.bicep' = {

@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 def invoke_microservice_b():
     with DaprClient() as d:
-        microservice_b_app_id = "order-processor"
+        microservice_b_app_id = "openai"
         method_name = "greet"
         message = "this works"
         response = d.invoke_method(app_id=microservice_b_app_id, method_name=method_name, data=json.dumps({'message': message}), http_verb="POST")

@@ -14,7 +14,7 @@ param location string
 //      "value": "myGroupName"
 // }
 param apiContainerAppName string = ''
-param apiServiceName string = 'order-processor'
+param apiServiceName string = 'openai'
 param applicationInsightsDashboardName string = ''
 param applicationInsightsName string = ''
 param containerAppsEnvironmentName string = ''
@@ -22,7 +22,7 @@ param containerRegistryName string = ''
 param logAnalyticsName string = ''
 param resourceGroupName string = ''
 param workerContainerAppName string = ''
-param workerServiceName string = 'checkout'
+param workerServiceName string = 'chatbot'
 
 @description('Flag to use Azure API Management to mediate the calls between the Web frontend and the backend API')
 param useAPIM bool = false

@@ -5,7 +5,7 @@ param tags object = {}
 param containerAppsEnvironmentName string
 param containerRegistryName string
 param imageName string = ''
-param serviceName string = 'checkout'
+param serviceName string = 'chatbot'
 param managedIdentityName string = ''
 
 module app '../core/host/container-app-worker.bicep' = {
