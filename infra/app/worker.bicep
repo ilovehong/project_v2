@@ -2,11 +2,18 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 
+param applicationInsightsName string
 param containerAppsEnvironmentName string
 param containerRegistryName string
 param imageName string = ''
 param serviceName string = 'chatbot'
 param managedIdentityName string = ''
+param dbserverDomainName string
+param dbserverDatabaseName string
+param dbserverUser string
+
+@secure()
+param dbserverPassword string
 
 module app '../core/host/container-app-worker.bicep' = {
   name: '${serviceName}-container-app-module'
@@ -21,7 +28,47 @@ module app '../core/host/container-app-worker.bicep' = {
     containerName: serviceName
     managedIdentityEnabled: true
     managedIdentityName: managedIdentityName
+    env: [
+      {
+        name: 'POSTGRES_HOST'
+        value: dbserverDomainName
+      }
+      {
+        name: 'POSTGRES_USERNAME'
+        value: dbserverUser
+      }
+      {
+        name: 'POSTGRES_DATABASE'
+        value: dbserverDatabaseName
+      }
+      {
+        name: 'POSTGRES_PASSWORD'
+        secretRef: 'dbserver-password'
+      }
+      {
+        name: 'POSTGRES_SSL'
+        value: 'require'
+      }
+      {
+        name: 'RUNNING_IN_PRODUCTION'
+        value: 'true'
+      }
+      {
+        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        value: applicationInsights.properties.ConnectionString
+      }
+      ]
+    secrets: [
+        {
+          name: 'dbserver-password'
+          value: dbserverPassword
+        }
+      ]
   }
+}
+
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+  name: applicationInsightsName
 }
 
 output SERVICE_WEB_IDENTITY_PRINCIPAL_ID string = app.outputs.identityPrincipalId

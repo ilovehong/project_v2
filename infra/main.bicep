@@ -36,15 +36,34 @@ param apiImageName string = ''
 @description('The image name for the web service')
 param workerImageName string = ''
 
+@secure()
+@description('DBServer administrator password')
+param dbserverPassword string
+
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
+var prefix = '${environmentName}-${resourceToken}'
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: !empty(resourceGroupName) ? resourceGroupName : '${abbrs.resourcesResourceGroups}${environmentName}'
   location: location
   tags: tags
+}
+
+
+module db './app/db.bicep' = {
+  name: 'db'
+  scope: rg
+  params: {
+    name: 'dbserver'
+    location: location
+    tags: tags
+    prefix: prefix
+    dbserverDatabaseName: 'relecloud'
+    dbserverPassword: dbserverPassword
+  }
 }
 
 // Shared App Env
@@ -69,10 +88,15 @@ module worker './app/worker.bicep' = {
     name: !empty(workerContainerAppName) ? workerContainerAppName : '${abbrs.appContainerApps}${workerServiceName}-${resourceToken}'
     location: location
     imageName: workerImageName
+    applicationInsightsName: monitoring.outputs.applicationInsightsName
     containerAppsEnvironmentName: appEnv.outputs.environmentName
     containerRegistryName: appEnv.outputs.registryName
     serviceName: workerServiceName
     managedIdentityName: security.outputs.managedIdentityName
+    dbserverDomainName: db.outputs.dbserverDomainName
+    dbserverUser: db.outputs.dbserverUser
+    dbserverDatabaseName: db.outputs.dbserverDatabaseName
+    dbserverPassword: dbserverPassword
   }
 }
 

@@ -5,7 +5,9 @@ param tags object = {}
 param containerAppsEnvironmentName string = ''
 param containerName string = 'main'
 param containerRegistryName string = ''
+
 param env array = []
+param secrets array = []
 param imageName string
 param keyVaultName string = ''
 param managedIdentityEnabled bool = !empty(keyVaultName)
@@ -35,24 +37,18 @@ resource app 'Microsoft.App/containerApps@2022-03-01' = {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {
       activeRevisionsMode: 'single'
-      secrets: [
-        {
-          name: 'registry-password'
-          value: containerRegistry.listCredentials().passwords[0].value
-        }
-        {
-          name: 'telegram-access-token'
-          value: '6942067828:AAEy5z02N1NEmYP2tVQLVnSRSDMlm-zWnOw'
-        }
-        {
-          name: 'redis-password'
-          value: '84DgAVAk5WXYvKoUEe1BAOHsCX6PXwrg'
-        }
-        {
-          name: 'chatgpt-access-token'
-          value: '05f203b4-44b1-4a94-bd9f-d6e9048012cf'
-        }
-      ]
+      secrets: union(secrets, 
+        [
+          {
+            name: 'registry-password'
+            value: containerRegistry.listCredentials().passwords[0].value
+          }
+          {
+            name: 'telegram-access-token'
+            value: '6942067828:AAEy5z02N1NEmYP2tVQLVnSRSDMlm-zWnOw'
+          }
+        ]
+      )
       dapr: {
         enabled: daprEnabled
         appId: daprApp
@@ -71,40 +67,14 @@ resource app 'Microsoft.App/containerApps@2022-03-01' = {
         {
           image: imageName
           name: containerName
-          env: [
-            {
-              name: 'TELEGRAM_ACCESS_TOKEN'
-              secretRef: 'telegram-access-token'
-            }
-            {
-              name: 'REDIS_PASSWORD'
-              secretRef: 'redis-password'
-            }
-            {
-              name: 'CHATGPT_ACCESS_TOKEN'
-              secretRef: 'chatgpt-access-token'
-            }
-            {
-              name: 'REDIS_HOST'
-              value: 'redis-11851.c56.east-us.azure.cloud.redislabs.com'
-            }
-            {
-              name: 'REDIS_PORT'
-              value: '11851'
-            }
-            {
-              name: 'CHATGPT_BASICURL'
-              value: 'https://chatgpt.hkbu.edu.hk/general/rest'
-            }
-            {
-              name: 'CHATGPT_MODELNAME'
-              value: 'gpt-35-turbo-16k'
-            }
-            {
-              name: 'CHATGPT_APIVERSION'
-              value: '2023-12-01-preview'
-            }
-          ]
+          env: union(env,
+            [
+              {
+                name: 'TELEGRAM_ACCESS_TOKEN'
+                secretRef: 'telegram-access-token'
+              }
+            ]
+          )
           resources: {
             cpu: json(containerCpuCoreCount)
             memory: containerMemory
