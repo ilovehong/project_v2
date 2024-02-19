@@ -61,7 +61,7 @@ module db './app/db.bicep' = {
     location: location
     tags: tags
     prefix: prefix
-    dbserverDatabaseName: 'relecloud'
+    dbserverDatabaseName: 'chathistory'
     dbserverPassword: dbserverPassword
   }
 }
