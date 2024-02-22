@@ -1,3 +1,10 @@
 Flask
 dapr
 requests
+langchain
+openai
+pinecone-client
+langchain-community
+langchain-openai
+langchain-pinecone
+pypdf

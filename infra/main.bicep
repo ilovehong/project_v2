@@ -40,6 +40,18 @@ param workerImageName string = ''
 @description('DBServer administrator password')
 param dbserverPassword string
 
+@secure()
+@description('OpenAI API key')
+param openaiAPIKey string
+
+@secure()
+@description('Pinecone API key')
+param pineconeaiAPIKey string
+
+@secure()
+@description('Telegram access token')
+param telegramAccessToken string
+
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 var tags = { 'azd-env-name': environmentName }
@@ -97,6 +109,7 @@ module worker './app/worker.bicep' = {
     dbserverUser: db.outputs.dbserverUser
     dbserverDatabaseName: db.outputs.dbserverDatabaseName
     dbserverPassword: dbserverPassword
+    telegramAccessToken: telegramAccessToken
   }
 }
 
@@ -112,6 +125,8 @@ module api './app/api.bicep' = {
     containerRegistryName: appEnv.outputs.registryName
     serviceName: apiServiceName
     managedIdentityName: security.outputs.managedIdentityName
+    openaiAPIKey: openaiAPIKey
+    pineconeAPIKey: pineconeaiAPIKey
   }
 }
 

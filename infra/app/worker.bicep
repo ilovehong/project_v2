@@ -15,6 +15,10 @@ param dbserverUser string
 @secure()
 param dbserverPassword string
 
+@secure()
+param telegramAccessToken string
+
+
 module app '../core/host/container-app-worker.bicep' = {
   name: '${serviceName}-container-app-module'
   params: {
@@ -29,6 +33,10 @@ module app '../core/host/container-app-worker.bicep' = {
     managedIdentityEnabled: true
     managedIdentityName: managedIdentityName
     env: [
+      {
+        name: 'TELEGRAM_ACCESS_TOKEN'
+        secretRef: 'telegram-accesstoken'
+      }
       {
         name: 'POSTGRES_HOST'
         value: dbserverDomainName
@@ -57,13 +65,17 @@ module app '../core/host/container-app-worker.bicep' = {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
         value: applicationInsights.properties.ConnectionString
       }
-      ]
+    ]
     secrets: [
-        {
-          name: 'dbserver-password'
-          value: dbserverPassword
-        }
-      ]
+      {
+        name: 'dbserver-password'
+        value: dbserverPassword
+      }
+      {
+        name: 'telegram-accesstoken'
+        value: telegramAccessToken
+      }
+    ]
   }
 }
 

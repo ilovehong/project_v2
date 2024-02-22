@@ -5,6 +5,7 @@ param tags object = {}
 param containerAppsEnvironmentName string = ''
 param containerName string = 'main'
 param containerRegistryName string = ''
+
 param env array = []
 param secrets array = []
 param external bool = true
@@ -50,10 +51,6 @@ resource app 'Microsoft.App/containerApps@2022-03-01' = {
             name: 'registry-password'
             value: containerRegistry.listCredentials().passwords[0].value
           }
-          {
-            name: 'chatgpt-access-token'
-            value: '05f203b4-44b1-4a94-bd9f-d6e9048012cf'
-          }
         ]
       )
       dapr: {
@@ -78,20 +75,8 @@ resource app 'Microsoft.App/containerApps@2022-03-01' = {
           env: union(env,
             [
               {
-                name: 'CHATGPT_ACCESS_TOKEN'
-                secretRef: 'chatgpt-access-token'
-              }
-              {
-                name: 'CHATGPT_BASICURL'
-                value: 'https://chatgpt.hkbu.edu.hk/general/rest'
-              }
-              {
-                name: 'CHATGPT_MODELNAME'
-                value: 'gpt-35-turbo-16k'
-              }
-              {
-                name: 'CHATGPT_APIVERSION'
-                value: '2023-12-01-preview'
+                name: 'SAMPLE'
+                value: 'place_holder'
               }
             ]
           )

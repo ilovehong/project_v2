@@ -24,8 +24,7 @@ bot_id = None
 logger = MessageLogger(db_config)
 
 def main():
-    telegram_access_token = os.environ.get('TELEGRAM_ACCESS_TOKEN')
-    updater = Updater(token=telegram_access_token, use_context=True)
+    updater = Updater(token=os.environ.get('TELEGRAM_ACCESS_TOKEN'), use_context=True)
     
     global bot_id
     bot_info = updater.bot.get_me()
@@ -61,13 +60,19 @@ def invoke_openai_chatgpt(update: Update, context: CallbackContext):
     except Exception as e:
             reply_message = f"Failed to call the openai chat service: {str(e)}"
 
-    reply_message = json.loads(reply_message)["message"]
+    parsed_message = json.loads(reply_message)
 
     # Log the reply message
     global bot_id
-    logger.log_message(bot_id, reply_message)
+    
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text=reply_message)
+    for key, value in parsed_message.items():
+        if key == "answer":
+            logger.log_message(bot_id, value)
+            context.bot.send_message(chat_id=update.effective_chat.id, text=value)
+        elif key == "sources":
+            template = "{}: {}"
+            context.bot.send_message(chat_id=update.effective_chat.id, text=template.format(key, value))
 
 @app.route('/')
 def hello():

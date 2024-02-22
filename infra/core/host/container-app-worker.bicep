@@ -43,10 +43,6 @@ resource app 'Microsoft.App/containerApps@2022-03-01' = {
             name: 'registry-password'
             value: containerRegistry.listCredentials().passwords[0].value
           }
-          {
-            name: 'telegram-access-token'
-            value: '6942067828:AAEy5z02N1NEmYP2tVQLVnSRSDMlm-zWnOw'
-          }
         ]
       )
       dapr: {
@@ -70,8 +66,8 @@ resource app 'Microsoft.App/containerApps@2022-03-01' = {
           env: union(env,
             [
               {
-                name: 'TELEGRAM_ACCESS_TOKEN'
-                secretRef: 'telegram-access-token'
+                name: 'SAMPLE'
+                value: 'place_holder'
               }
             ]
           )

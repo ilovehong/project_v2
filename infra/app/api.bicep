@@ -8,6 +8,12 @@ param imageName string = ''
 param serviceName string = 'openai'
 param managedIdentityName string = ''
 
+@secure()
+param openaiAPIKey string
+
+@secure()
+param pineconeAPIKey string
+
 module app '../core/host/container-app.bicep' = {
   name: '${serviceName}-container-app-module'
   params: {
@@ -24,6 +30,34 @@ module app '../core/host/container-app.bicep' = {
     targetPort: 5001
     managedIdentityEnabled: managedIdentityName != ''? true: false
     managedIdentityName: managedIdentityName
+    env: [
+      {
+        name: 'OPENAI_API_KEY'
+        secretRef: 'openai-apikey'
+      }
+      {
+        name: 'OPENAI_MODELNAME'
+        value: 'gpt-35-turbo-16k'
+      }
+      {
+        name: 'PINECONE_API_KEY'
+        secretRef: 'pinecone-apikey'
+      }
+      {
+        name: 'PINECONE_INDEX_NAME'
+        value: 'document-qa'
+      }
+    ]
+    secrets: [
+      {
+        name: 'openai-apikey'
+        value: openaiAPIKey
+      }
+      {
+        name: 'pinecone-apikey'
+        value: pineconeAPIKey
+      }
+    ]
   }
 }
 
