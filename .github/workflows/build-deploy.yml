@@ -1,10 +1,11 @@
 name: test-and-deploy
 
 on:
-  workflow_call:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
