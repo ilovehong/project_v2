@@ -58,11 +58,3 @@ The project is configured with GitHub Actions for CI/CD, automating the process 
 - `.github/`: CI/CD configuration files for GitHub Actions.
 - `Azd up`: Command support for deploying the application with Azure Developer CLI.
 
-## Contributing
-
-Contributions to this project are welcome! Please fork the repository, create a feature branch, and submit a pull request for review.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-

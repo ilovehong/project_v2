@@ -88,7 +88,7 @@ def create_app():
         if not message:
             return jsonify({"error": "Message is required"}), 400
 
-        template = "Respond as a teaching assistant, ensuring your reply is structured and conveyed with a professional tone. QUESTION: {question}"
+        template = "Respond as a HONG KONG BAPTIST UNIVERSITY (HKBU) teaching assistant, ensuring your reply is structured and conveyed with a professional tone. QUESTION: {question}"
         filled_template = template.format(question=message)
         response_message = app.qa_with_sources.invoke(filled_template)
         return jsonify(serialize(response_message))
