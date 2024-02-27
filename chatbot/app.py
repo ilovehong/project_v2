@@ -76,7 +76,6 @@ def invoke_openai_chatgpt(update: Update, context: CallbackContext):
 
 @app.route('/')
 def hello():
-    # This endpoint still exists to handle HTTP requests to Microservice A
     return "Microservice A is running and ready to handle requests."
 
 if __name__ == '__main__':
