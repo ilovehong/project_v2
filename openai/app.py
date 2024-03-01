@@ -7,7 +7,8 @@ from langchain_openai import OpenAIEmbeddings, OpenAI as llopenai
 from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain_community.vectorstores import Pinecone as LangchainPinecone
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chains import RetrievalQAWithSourcesChain
+from langchain.chains import RetrievalQAWithSourcesChain, LLMChain
+from langchain import PromptTemplate
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -52,26 +53,18 @@ def document_to_dict(doc):
 def serialize(value):
     # Initialize a dictionary for the serialized value
     serialized_value = {}
-    
-    # Serialize each key if it exists in the input value
-    if 'question' in value:
-        serialized_value['question'] = value['question']
-    
-    if 'answer' in value:
-        serialized_value['answer'] = value['answer']
-    
-    if 'sources' in value:
-        serialized_value['sources'] = value['sources']
-    
-    # Check for 'source_documents' and serialize if it exists
-    if 'source_documents' in value and isinstance(value['source_documents'], list):
-        serialized_docs = [document_to_dict(doc) for doc in value['source_documents']]
-        serialized_value['source_documents'] = serialized_docs
+
+    if isinstance(value, str):
+        serialized_value["feedback"] = value
     else:
-        # Optionally, you can provide a default value if 'source_documents' is missing
-        # serialized_value['source_documents'] = []
-        # Or simply omit 'source_documents' if it's not present
-        pass
+        # Dynamically serialize each key in the input value
+        for key, val in value.items():
+            # Apply custom serialization for known complex types
+            if key == 'source_documents' and isinstance(val, list):
+                serialized_value[key] = [document_to_dict(doc) for doc in val]
+            else:
+                # For all other values, copy them directly
+                serialized_value[key] = val
 
     return serialized_value
 
@@ -88,9 +81,43 @@ def create_app():
         if not message:
             return jsonify({"error": "Message is required"}), 400
 
-        template = "Respond as a HONG KONG BAPTIST UNIVERSITY (HKBU) teaching assistant, ensuring your reply is structured and conveyed with a professional tone. QUESTION: {question}"
+        template = "Respond as a teaching assistant, ensuring your reply is structured and conveyed with a professional tone. QUESTION: {question}"
         filled_template = template.format(question=message)
         response_message = app.qa_with_sources.invoke(filled_template)
+        return jsonify(serialize(response_message))
+
+    @app.route('/mark', methods=['POST'])
+    def mark():
+        data = request.json
+        message = data.get('message')
+        if not message:
+            return jsonify({"error": "Message is required"}), 400
+        
+        subject, essay = message.split(':', 1)
+        # Constructing the prompt
+        prompt_text = """
+        Essay Subject: {subject}
+        Essay Text: {essay}
+
+        As an expert reviewer, please evaluate the essay based on the following criteria, rating each from 0 to 10, and provide brief feedback:
+        1. Content and Understanding: Relevance and depth of the essay in relation to the subject.
+        2. Organization and Structure: Clarity and logical flow of ideas.
+        3. Style and Tone: Appropriateness and engagement of the writing style and tone.
+        4. Grammar and Mechanics: Correctness of grammar and punctuation.
+        5. Originality and Creativity: Originality of ideas and creative presentation.
+
+        Provide a summary score for each criterion followed by overall feedback.
+        """
+
+        prompt = PromptTemplate(input_variables=["subject", "essay"],template=prompt_text)
+
+        response_message = app.llm.invoke(prompt.format(
+        subject=subject,
+        essay=essay
+        ))
+        
+        # Serialize response_message appropriately before returning
+        # Assuming serialize is a function you have defined to convert the response into a JSON-serializable format
         return jsonify(serialize(response_message))
 
     return app
